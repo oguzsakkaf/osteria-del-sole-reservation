@@ -7,121 +7,73 @@
     <style>
         :root { --bg: #f2f2f7; --card: rgba(255, 255, 255, 0.98); --text: #1c1c1e; --accent: #007aff; --border: #d1d1d6; --sub-text: #8e8e93; }
         @media (prefers-color-scheme: dark) { :root { --bg: #000000; --card: rgba(28, 28, 30, 0.98); --text: #ffffff; --border: #38383a; } }
-        
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; min-height: 100vh; }
         .bg-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1498579150354-977475b7ea0b?auto=format&fit=crop&w=1920&q=80'); background-size: cover; z-index: -1; pointer-events: none; }
-        
         .container { max-width: 800px; margin: 0 auto; padding: 40px 20px; position: relative; z-index: 10; }
         .card { background: var(--card); border-radius: 20px; padding: 25px; border: 1px solid var(--border); margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); width: 100%; }
         .hidden { display: none !important; }
-        
         input, select, button { display: block; width: 100%; padding: 16px; margin-bottom: 12px; border-radius: 12px; border: 1px solid var(--border); font-size: 16px; position: relative; z-index: 999; }
         button { background: var(--accent); color: white; border: none; font-weight: 600; cursor: pointer; }
         .secondary-btn { background: #5856d6 !important; }
-
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; text-align: center; }
         .stat-box { background: rgba(0,122,255,0.1); padding: 15px; border-radius: 15px; border: 1px solid var(--accent); }
         .stat-box b { display: block; font-size: 20px; color: var(--accent); }
         .stat-box small { font-size: 10px; color: var(--sub-text); text-transform: uppercase; }
-
         #layout { position: relative; width: 630px; height: 380px; background: rgba(255,255,255,0.1); border: 1px solid var(--border); margin: 20px auto; border-radius: 15px; }
         .table { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-size: 11px; font-weight: bold; cursor: pointer; text-shadow: 1px 1px 2px black; }
-        .available { background: #34c759; } 
-        .reserved { background: #ff3b30 !important; cursor: not-allowed; } 
-        .incompatible { background: #48484a !important; opacity: 0.8; cursor: not-allowed; } 
+        .available { background: #34c759; } .reserved { background: #ff3b30 !important; cursor: not-allowed; } .incompatible { background: #48484a !important; opacity: 0.8; cursor: not-allowed; } 
         .selected { border: 4px solid #ffcc00; transform: scale(1.05); z-index: 100; }
-
         .res-item { display: flex; justify-content: space-between; padding: 15px; border-bottom: 1px solid var(--border); align-items: center; }
         .badge { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: bold; }
         .pending { background: #ff9500; color: white; } .confirmed { background: #34c759; color: white; } .cancelled { background: #ff3b30; color: white; }
-
         #depositModal, #cancelModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; backdrop-filter: blur(5px); }
         .modal-content { background: var(--card); padding: 30px; border-radius: 25px; max-width: 400px; width: 90%; text-align: center; border: 1px solid var(--border); }
-        .info-text { font-size: 13px; color: var(--sub-text); margin-top: 5px; }
         .cancelled-box { background: rgba(255, 59, 48, 0.1); border: 1px solid #ff3b30; padding: 10px; border-radius: 10px; margin-top: 5px; font-size: 12px; text-align: left; }
     </style>
 </head>
 <body>
 <div class="bg-overlay"></div>
-
-<div id="depositModal" class="hidden"><div class="modal-content"><h2 style="color: var(--accent);">Ön Ödeme (Kapora)</h2><p>Rezervasyonunuzun kesinleşmesi için <b>250 TL</b> kapora yatırmanız gerekmektedir.</p><div style="background: rgba(0,0,0,0.05); padding: 15px; border-radius: 15px; margin: 15px 0; font-family: monospace; font-size: 12px;">TR00 0000 0000 0000 0000 0000 00<br><b>Osteria del Sole LTD. ŞTİ.</b></div><button onclick="confirmDeposit()">Ödemeyi Yaptım</button><button onclick="closeModals()" style="background:none; color:var(--text); margin-top: 5px;">Vazgeç</button></div></div>
-
-<div id="cancelModal" class="hidden"><div class="modal-content"><h2 style="color: #ff3b30;">İptal Nedeni</h2><select id="cancelReasonSelect" style="margin-bottom: 20px;"><option value="Müşteri talebi.">1: Müşteri talebi.</option><option value="Kapora yatırılmadı.">2: Kapora yatırılmadı.</option><option value="Müşteri belirtilen süre içerisinde gelmedi.">3: Müşteri gelmedi.</option></select><button onclick="submitCancel()" style="background:#ff3b30;">İptali Onayla</button><button onclick="closeModals()" style="background:none; color:var(--text); margin-top: 5px;">Geri</button></div></div>
-
+<div id="depositModal" class="hidden"><div class="modal-content"><h2>Ön Ödeme (Kapora)</h2><p>Kesinleşmesi için <b>250 TL</b> kapora yatırmanız gerekmektedir.</p><div style="background:rgba(0,0,0,0.05);padding:15px;border-radius:15px;margin:15px 0;font-family:monospace;font-size:12px;">TR00 0000 0000 0000 0000 0000 00<br><b>Osteria del Sole LTD. ŞTİ.</b></div><button onclick="confirmDeposit()">Ödemeyi Yaptım</button><button onclick="closeModals()" style="background:none;color:var(--text);">Vazgeç</button></div></div>
+<div id="cancelModal" class="hidden"><div class="modal-content"><h2>İptal Nedeni</h2><select id="cancelReasonSelect" style="margin-bottom:20px;"><option value="Müşteri talebi.">1: Müşteri talebi.</option><option value="Kapora yatırılmadı.">2: Kapora yatırılmadı.</option><option value="Müşteri belirtilen süre içerisinde gelmedi.">3: Müşteri gelmedi.</option></select><button onclick="submitCancel()" style="background:#ff3b30;">İptali Onayla</button><button onclick="closeModals()" style="background:none;color:var(--text);">Geri</button></div></div>
 <div class="container">
     <div id="loginScreen" class="card" style="text-align: center;">
-        <h1 style="margin-bottom: 10px; font-weight: 800;">Osteria del Sole</h1>
-        <div style="margin-bottom: 20px;">
-            <div class="info-text">📍 ******** / İstanbul</div>
-            <div class="info-text">📞 ********</div>
-        </div>
+        <h1>Osteria del Sole</h1>
+        <div style="margin-bottom: 20px;"><div style="font-size:13px; color:var(--sub-text);">📍 ******** / İstanbul</div><div style="font-size:13px; color:var(--sub-text);">📞 ********</div></div>
         <div id="custForm">
             <input type="text" id="custName" placeholder="Ad Soyad">
             <input type="tel" id="custPhone" placeholder="05xx xxx xx xx" maxlength="11">
             <button onclick="login('cust')">Giriş Yap</button>
             <button class="secondary-btn" onclick="window.open('/osteria-del-sole-menu.pdf', '_blank')">🍽️ Menü Görüntüle</button>
-            <p onclick="toggleStaff()" style="color:var(--accent); cursor:pointer; margin-top:20px; font-size: 14px;">Personel Girişi</p>
+            <p onclick="toggleStaff()" style="color:var(--accent);cursor:pointer;margin-top:20px;font-size:14px;">Personel Girişi</p>
         </div>
-        <div id="staffForm" class="hidden">
-            <input type="text" id="staffUser" placeholder="Yönetici">
-            <input type="password" id="staffPass" placeholder="Şifre">
-            <button onclick="login('staff')" style="background:#5856d6">Giriş</button>
-            <p onclick="toggleStaff()" style="cursor:pointer; margin-top:15px; font-size: 14px;">Geri</p>
-        </div>
+        <div id="staffForm" class="hidden"><input type="text" id="staffUser" placeholder="Yönetici"><input type="password" id="staffPass" placeholder="Şifre"><button onclick="login('staff')" style="background:#5856d6">Giriş</button><p onclick="toggleStaff()" style="cursor:pointer;margin-top:15px;">Geri</p></div>
     </div>
-
     <div id="appScreen" class="hidden">
-        <div class="card" style="display:flex; justify-content:space-between; align-items:center;">
-            <h2 id="welcomeText" style="margin:0; font-size: 18px;"></h2>
-            <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#ff3b30; margin:0; font-size: 13px;">Çıkış</button>
-        </div>
-
-        <div id="staffDashboard" class="card hidden">
-            <div class="stats-grid">
-                <div class="stat-box"><small>Bugün</small><b id="statTotal">0</b></div>
-                <div class="stat-box"><small>Misafir</small><b id="statGuests">0</b></div>
-                <div class="stat-box"><small>Doluluk</small><b id="statOcc">%0</b></div>
-            </div>
-        </div>
-
+        <div class="card" style="display:flex; justify-content:space-between; align-items:center;"><h2 id="welcomeText" style="margin:0; font-size: 18px;"></h2><button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#ff3b30; margin:0;">Çıkış</button></div>
+        <div id="staffDashboard" class="card hidden"><div class="stats-grid"><div class="stat-box"><small>Bugün</small><b id="statTotal">0</b></div><div class="stat-box"><small>Misafir</small><b id="statGuests">0</b></div><div class="stat-box"><small>Doluluk</small><b id="statOcc">%0</b></div></div></div>
         <div class="card" style="display:grid; grid-template-columns: 1fr 1.5fr 1fr; gap:10px">
             <div><label style="font-size: 11px;">Kişi</label><select id="guestCount" onchange="load()"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
             <div><label style="font-size: 11px;">Tarih/Saat</label><input type="datetime-local" id="startTime" onchange="load()"></div>
             <div><label style="font-size: 11px;">Süre</label><select id="duration" onchange="load()"><option value="1">1 Saat</option><option value="2">2 Saat</option><option value="3">3 Saat</option></select></div>
         </div>
-
         <div id="layout"></div>
-        <div class="card" style="text-align:center"><h3 id="tableInfo" style="margin-bottom: 20px;">Masa Seçin</h3><button onclick="openDeposit()">Rezervasyon Talebi Oluştur</button></div>
+        <div class="card" style="text-align:center"><h3 id="tableInfo">Masa Seçin</h3><button onclick="openDeposit()">Rezervasyon Talebi Oluştur</button></div>
         <div class="card"><h3>Rezervasyonlarım ve Geçmiş</h3><div id="resList"></div></div>
     </div>
 </div>
-
 <script>
     let user = null, selected = null, activeCancelId = null;
     const call = async (u, m="GET", b=null) => {
         const r = await fetch(u, { method:m, headers:{"Content-Type":"application/json"}, body:b?JSON.stringify(b):null });
-        const d = await r.json(); 
-        if (!r.ok) {
-            // BURASI YENİ: Backend'den gelen 400 hatasını (mükerrer kayıt) popup ile gösterir
-            if (r.status === 400) alert(d.message); 
-            throw new Error(d.message); 
-        }
-        return d;
+        const d = await r.json(); if (!r.ok) { if(r.status===400) alert(d.message); throw new Error(d.message); } return d;
     };
-
-    const setupEnter = (ids, fn) => ids.forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.onkeypress = e => { if(e.key === 'Enter') fn(); };
-    });
-
+    const setupEnter = (ids, fn) => ids.forEach(id => { const el = document.getElementById(id); if(el) el.onkeypress = e => { if(e.key === 'Enter') fn(); }; });
     setupEnter(['custName', 'custPhone'], () => login('cust'));
     setupEnter(['staffUser', 'staffPass'], () => login('staff'));
-
     function toggleStaff() { document.getElementById('custForm').classList.toggle('hidden'); document.getElementById('staffForm').classList.toggle('hidden'); }
     function closeModals() { document.getElementById('depositModal').classList.add('hidden'); document.getElementById('cancelModal').classList.add('hidden'); }
-
-    async function login(type) {
+    async function login(type) { 
         try {
             const b = type==='cust' ? { fullName: document.getElementById('custName').value, phone: document.getElementById('custPhone').value } : { username: document.getElementById('staffUser').value, password: document.getElementById('staffPass').value };
             const res = await call(`/api/login/${type}`, "POST", b);
@@ -129,56 +81,35 @@
             document.getElementById('welcomeText').textContent = "Benvenuto, " + user.fullName;
             if(user.role === 'staff') document.getElementById('staffDashboard').classList.remove('hidden');
             load();
-        } catch(e) { /* Hata zaten call içinde alert ediliyor */ }
+        } catch(e) {}
     }
-
     async function load() {
-        if(user && user.role === 'staff') {
-            const s = await call("/api/stats");
-            document.getElementById('statTotal').textContent = s.totalRes; document.getElementById('statGuests').textContent = s.totalGuests; document.getElementById('statOcc').textContent = `%${s.occupancy}`;
-        }
+        if(user && user.role === 'staff') { const s = await call("/api/stats"); document.getElementById('statTotal').textContent = s.totalRes; document.getElementById('statGuests').textContent = s.totalGuests; document.getElementById('statOcc').textContent = `%${s.occupancy}`; }
         const gc = Number(document.getElementById('guestCount').value);
         const tables = await call(`/api/availability?startTime=${document.getElementById('startTime').value}&duration=${document.getElementById('duration').value}`);
         const layout = document.getElementById('layout'); layout.innerHTML = "";
         tables.forEach(t => {
             const inc = (gc <= 2 && t.capacity > 2) || (gc > 2 && gc <= 4 && t.capacity !== 4 && t.capacity !== 6) || (gc > 4 && t.capacity < 6);
-            const div = document.createElement("div");
-            div.className = `table ${t.shape} ${t.isReserved ? 'reserved' : (inc ? 'incompatible' : 'available')} ${selected?.id===t.id?'selected':''}`;
+            const div = document.createElement("div"); div.className = `table ${t.shape} ${t.isReserved ? 'reserved' : (inc ? 'incompatible' : 'available')} ${selected?.id===t.id?'selected':''}`;
             div.style.cssText = `left:${t.x}px; top:${t.y}px; width:${t.shape==='rect'?110:75}px; height:60px; border-radius:${t.shape==='round'?'50%':'10px'}`;
             div.innerHTML = `<span>${t.name}</span>`;
             if(!t.isReserved && !inc) div.onclick = () => { selected = t; document.getElementById('tableInfo').textContent = t.name; load(); };
             layout.appendChild(div);
         });
-
         const res = await call("/api/reservations");
         const list = document.getElementById("resList"); list.innerHTML = "";
         res.forEach(r => {
             const statusTxt = r.status === 'pending' ? 'Bekliyor' : r.status === 'confirmed' ? 'Onaylandı' : 'İptal Edildi';
-            list.innerHTML += `<div class="res-item">
-                <div style="flex: 1;"><b>${r.customer_name} - ${r.tableName}</b><br><small>${new Date(r.start_time).toLocaleString('tr-TR')}</small>
-                ${r.status==='cancelled' ? `<div class="cancelled-box"><b>Bilgi:</b> ${r.cancel_reason}</div>` : ''}</div>
-                <div style="display:flex; gap:5px; align-items:center"><span class="badge ${r.status}">${statusTxt}</span>
-                ${user.role==='staff' && r.status==='pending' ? `<button onclick="conf(${r.id})" style="width:auto; padding:5px 10px; font-size:11px; margin:0;">Onayla</button>` : ''}
-                ${r.status!=='cancelled' ? `<button onclick="triggerCancel(${r.id})" style="background:#ff3b30; width:auto; padding:5px 10px; font-size:11px; margin:0;">İptal</button>` : ''}</div></div>`;
+            list.innerHTML += `<div class="res-item"><div style="flex:1;"><b>${r.customer_name} - ${r.tableName}</b><br><small>${new Date(r.start_time).toLocaleString('tr-TR')}</small>${r.status==='cancelled' ? `<div class="cancelled-box"><b>Bilgi:</b> ${r.cancel_reason}</div>` : ''}</div><div style="display:flex;gap:5px;align-items:center"><span class="badge ${r.status}">${statusTxt}</span>${user.role==='staff'&&r.status==='pending'?`<button onclick="conf(${r.id})" style="width:auto;padding:5px 10px;font-size:11px;margin:0;">Onayla</button>`:''}${r.status!=='cancelled'?`<button onclick="triggerCancel(${r.id})" style="background:#ff3b30;width:auto;padding:5px 10px;font-size:11px;margin:0;">İptal</button>`:''}${user.role==='staff'&&r.status==='cancelled'?`<button onclick="purgeRes(${r.id})" style="background:#000;color:#fff;width:auto;padding:5px 10px;font-size:11px;margin:0;">🗑️ Sil</button>`:''}</div></div>`;
         });
     }
-
     function openDeposit() { if(!selected) return alert("Masa seçin!"); document.getElementById('depositModal').classList.remove('hidden'); }
     async function confirmDeposit() { closeModals(); await makeRes(); }
-    
-    async function makeRes() { 
-        try {
-            await call("/api/reservations", "POST", { tableId: selected.id, guests: document.getElementById('guestCount').value, start: document.getElementById('startTime').value, duration: document.getElementById('duration').value }); 
-            alert("Talebiniz iletildi!"); 
-            selected = null; 
-            load(); 
-        } catch(e) { /* Hata yönetimi call fonksiyonunda yapıldı */ }
-    }
-
+    async function makeRes() { try { await call("/api/reservations", "POST", { tableId: selected.id, guests: document.getElementById('guestCount').value, start: document.getElementById('startTime').value, duration: document.getElementById('duration').value }); alert("Talebiniz iletildi!"); selected = null; load(); } catch(e) {} }
     function triggerCancel(id) { if(user.role === 'customer') { if(confirm("İptal edilsin mi?")) submitCancel(id, "Müşteri iptal etti."); } else { activeCancelId = id; document.getElementById('cancelModal').classList.remove('hidden'); } }
     async function submitCancel(id = null, reason = null) { const targetId = id || activeCancelId; const targetReason = reason || document.getElementById('cancelReasonSelect').value; await call(`/api/reservations/${targetId}`, "DELETE", { reason: targetReason }); closeModals(); load(); }
+    async function purgeRes(id) { if(confirm("Kaydı tamamen silmek istediğine emin misin?")) { await call(`/api/reservations/${id}/purge`, "DELETE"); load(); } }
     window.conf = async id => { await call(`/api/reservations/${id}/confirm`, "PATCH"); load(); };
-    
     const now = new Date(); now.setMinutes(0); now.setHours(now.getHours() + 1);
     document.getElementById("startTime").value = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
 </script>
